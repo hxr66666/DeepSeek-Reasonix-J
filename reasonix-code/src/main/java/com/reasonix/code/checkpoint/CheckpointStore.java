@@ -1,16 +1,16 @@
 package com.reasonix.code.checkpoint;
 
+import com.reasonix.common.util.JsonUtils;
+import com.reasonix.common.util.PathUtils;
+
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 public class CheckpointStore {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public record CheckpointFile(String path, String content) {}
     public record Checkpoint(String id, String name, String rootDir, long createdAt, String source, List<CheckpointFile> files, int bytes) {}
@@ -26,7 +26,9 @@ public class CheckpointStore {
         Path indexPath = indexPath(rootDir);
         if (!Files.exists(indexPath)) return List.of();
         try {
-            return MAPPER.readValue(indexPath.toFile(), MAPPER.getTypeFactory().constructCollectionType(List.class, CheckpointMeta.class));
+            String json = Files.readString(indexPath);
+            return JsonUtils.mapper().readValue(json,
+                    JsonUtils.mapper().getTypeFactory().constructCollectionType(List.class, CheckpointMeta.class));
         } catch (IOException e) {
             return List.of();
         }
@@ -36,7 +38,7 @@ public class CheckpointStore {
         Path path = snapshotPath(rootDir, id);
         if (!Files.exists(path)) return null;
         try {
-            return MAPPER.readValue(path.toFile(), Checkpoint.class);
+            return JsonUtils.parse(Files.readString(path), Checkpoint.class);
         } catch (IOException e) {
             return null;
         }
@@ -50,7 +52,7 @@ public class CheckpointStore {
 
         for (String p : opts.paths()) {
             Path abs = Paths.get(absRoot, p).normalize();
-            if (!isUnderRoot(abs, absRoot)) continue;
+            if (!PathUtils.isUnder(abs, Paths.get(absRoot))) continue;
 
             Path absPath = Paths.get(absRoot).relativize(abs);
             String rel = absPath.toString().replace('\\', '/');
@@ -76,7 +78,7 @@ public class CheckpointStore {
         try {
             Path cpPath = snapshotPath(absRoot, id);
             Files.createDirectories(cpPath.getParent());
-            MAPPER.writeValue(cpPath.toFile(), checkpoint);
+            Files.writeString(cpPath, JsonUtils.toJson(checkpoint));
         } catch (IOException e) {
             throw new RuntimeException("Failed to write checkpoint", e);
         }
@@ -112,7 +114,7 @@ public class CheckpointStore {
 
         for (CheckpointFile f : cp.files()) {
             Path abs = Paths.get(absRoot, f.path()).normalize();
-            if (!isUnderRoot(abs, absRoot)) {
+            if (!PathUtils.isUnder(abs, Paths.get(absRoot))) {
                 result.skipped().add(new RestoreResult.Skipped(f.path(), "path escapes rootDir"));
                 continue;
             }
@@ -160,36 +162,21 @@ public class CheckpointStore {
         return removed;
     }
 
-    private static boolean isUnderRoot(Path absPath, String absRoot) {
-        Path root = Paths.get(absRoot);
-        String rel = root.relativize(absPath).toString();
-        return !rel.startsWith("..");
-    }
-
-    private static Path storeRoot(String rootDir) {
-        String home = System.getProperty("user.home");
-        return Paths.get(home, ".reasonix", "sessions", sanitizeRoot(rootDir), "checkpoints");
-    }
-
-    private static String sanitizeRoot(String rootDir) {
-        return Paths.get(rootDir).toAbsolutePath().normalize().toString()
-                .replaceAll("[\\\\/:]+", "_")
-                .replaceFirst("^_+", "");
-    }
-
     private static Path indexPath(String rootDir) {
-        return storeRoot(rootDir).resolve("index.json");
+        String safeName = PathUtils.sanitizeForFilename(Paths.get(rootDir).toAbsolutePath().normalize().toString());
+        return PathUtils.getSessionsDir().resolve(safeName).resolve("checkpoints").resolve("index.json");
     }
 
     private static Path snapshotPath(String rootDir, String id) {
-        return storeRoot(rootDir).resolve(id + ".json");
+        String safeName = PathUtils.sanitizeForFilename(Paths.get(rootDir).toAbsolutePath().normalize().toString());
+        return PathUtils.getSessionsDir().resolve(safeName).resolve("checkpoints").resolve(id + ".json");
     }
 
     private static void writeIndex(String rootDir, List<CheckpointMeta> items) {
         try {
             Path path = indexPath(rootDir);
             Files.createDirectories(path.getParent());
-            MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), items);
+            Files.writeString(path, JsonUtils.toPrettyJson(items));
         } catch (IOException e) {
             throw new RuntimeException("Failed to write checkpoint index", e);
         }
