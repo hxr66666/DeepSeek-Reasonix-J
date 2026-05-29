@@ -19,23 +19,24 @@ public class ShellTool implements ToolExecutor {
     private static final Logger log = LoggerFactory.getLogger(ShellTool.class);
 
     private static final long DEFAULT_TIMEOUT_MS = 120_000;
-    private static final List<String> BLOCKED_PATTERNS = List.of(
-            // 递归删除
-            "rm\\s+-rf", "rm\\s+--recursive", "rm\\s+--remove-destination",
-            // 格式化
-            "mkfs", "format", "fdisk",
-            // 磁盘写入
-            "dd\\s+if=", "dd\\s+of=",
-            // 进程炸弹
-            ":\\s*\\(\\s*\\)\\s*\\{\\s*:\\s*\\|\\s*:\\s*;\\s*\\}",
-            // 网络下载可能导致恶意代码
-            "wget", "curl",
-            // 权限更改可能导致安全漏洞
-            "chmod\\s+777",
-            // 系统关键文件
-            "/etc/passwd", "/etc/shadow", "/etc/sudoers",
-            // 覆盖根分区
-            ">\\s*/dev/sd", "mv\\s+[^ ]*\\s*/"
+    private static final List<Pattern> BLOCKED_PATTERNS = List.of(
+            Pattern.compile("rm\\s+-rf", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("rm\\s+--recursive", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("rm\\s+--remove-destination", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("mkfs", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("format", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("fdisk", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("dd\\s+if=", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("dd\\s+of=", Pattern.CASE_INSENSITIVE),
+            Pattern.compile(":\\s*\\(\\s*\\)\\s*\\{\\s*:\\s*\\|\\s*:\\s*;\\s*\\}", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("wget", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("curl", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("chmod\\s+777", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("/etc/passwd", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("/etc/shadow", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("/etc/sudoers", Pattern.CASE_INSENSITIVE),
+            Pattern.compile(">\\s*/dev/sd", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("mv\\s+[^ ]*\\s*/", Pattern.CASE_INSENSITIVE)
     );
 
     @Override
@@ -45,9 +46,8 @@ public class ShellTool implements ToolExecutor {
             return ToolHost.ToolResult.failure("No command provided");
         }
 
-        for (String pattern : BLOCKED_PATTERNS) {
-            if (Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
-                    .matcher(command).find()) {
+        for (Pattern pattern : BLOCKED_PATTERNS) {
+            if (pattern.matcher(command).find()) {
                 return ToolHost.ToolResult.failure("Blocked dangerous command pattern: " + pattern);
             }
         }
