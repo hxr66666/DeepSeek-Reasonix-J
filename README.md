@@ -2,12 +2,12 @@
 
 ## 项目概述
 
-**DeepSeek-Reasonix** 是一个专为 DeepSeek 优化的终端 AI 编程代理，围绕前缀缓存稳定性设计，长会话下 token 成本始终低位运行，可以一直开着使用。照着DeepSeek-Reasonix的java实现（原项目git连接 https://github.com/esengine/DeepSeek-Reasonix.git）
+**DeepSeek-Reasonix-j** 是一个专为 DeepSeek 优化的终端 AI 编程代理，围绕前缀缓存稳定性设计，长会话下 token 成本始终低位运行，可以一直开着使用。照着DeepSeek-Reasonix的java实现（原项目git连接 https://github.com/esengine/DeepSeek-Reasonix.git）
 
 ### 核心设计理念
 
 - **有立场而非通用**：每个抽象都由 DeepSeek 特定行为或经济属性驱动
-- **产品北极星**：足够便宜的编码代理，可以一直开着而不担心费用
+- **DeepSeek-Reasonix-j**：足够便宜的编码代理，可以一直开着而不担心费用
 - **故意不做多供应商灵活性**：只做 DeepSeek，绑死一个后端是特性而非限制
 - **终端优先**：不做 IDE 集成，diff 在 git diff，文件树在 ls
 
