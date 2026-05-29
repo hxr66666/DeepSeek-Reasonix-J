@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.reasonix</groupId>
-        <artifactId>reasonix</artifactId>
+        <artifactId>DeepSeek-Reasonix-J</artifactId>
         <version>1.0.0</version>
     </parent>
 

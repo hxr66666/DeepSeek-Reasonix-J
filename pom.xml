@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.reasonix</groupId>
-    <artifactId>reasonix</artifactId>
+    <artifactId>DeepSeek-Reasonix-J</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
-    <name>DeepSeek-Reasonix</name>
+    <name>DeepSeek-Reasonix-J</name>
     <description>DeepSeek-optimized AI coding agent with prefix-cache stability</description>
 
     <modules>

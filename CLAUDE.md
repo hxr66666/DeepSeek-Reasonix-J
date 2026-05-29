@@ -687,7 +687,7 @@ promptTokens / ctxMax
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.reasonix</groupId>
-    <artifactId>reasonix</artifactId>
+    <artifactId>DeepSeek-Reasonix-J</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
@@ -854,7 +854,7 @@ promptTokens / ctxMax
 <project>
     <parent>
         <groupId>com.reasonix</groupId>
-        <artifactId>reasonix</artifactId>
+        <artifactId>DeepSeek-Reasonix-J</artifactId>
         <version>1.0.0</version>
     </parent>
 
@@ -897,7 +897,7 @@ promptTokens / ctxMax
 <project>
     <parent>
         <groupId>com.reasonix</groupId>
-        <artifactId>reasonix</artifactId>
+        <artifactId>DeepSeek-Reasonix-J</artifactId>
         <version>1.0.0</version>
     </parent>
 
@@ -952,7 +952,7 @@ promptTokens / ctxMax
 <project>
     <parent>
         <groupId>com.reasonix</groupId>
-        <artifactId>reasonix</artifactId>
+        <artifactId>DeepSeek-Reasonix-J</artifactId>
         <version>1.0.0</version>
     </parent>
 
@@ -997,7 +997,7 @@ promptTokens / ctxMax
 <project>
     <parent>
         <groupId>com.reasonix</groupId>
-        <artifactId>reasonix</artifactId>
+        <artifactId>DeepSeek-Reasonix-J</artifactId>
         <version>1.0.0</version>
     </parent>
 
@@ -1044,7 +1044,7 @@ promptTokens / ctxMax
 <project>
     <parent>
         <groupId>com.reasonix</groupId>
-        <artifactId>reasonix</artifactId>
+        <artifactId>DeepSeek-Reasonix-J</artifactId>
         <version>1.0.0</version>
     </parent>
 
