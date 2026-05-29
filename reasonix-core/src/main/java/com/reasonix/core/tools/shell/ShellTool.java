@@ -12,14 +12,30 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public class ShellTool implements ToolExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(ShellTool.class);
 
     private static final long DEFAULT_TIMEOUT_MS = 120_000;
-    private static final List<String> BLOCKED_COMMANDS = List.of(
-            "rm -rf /", "mkfs", "dd if=", ":(){ :|:& };:", "format c:"
+    private static final List<String> BLOCKED_PATTERNS = List.of(
+            // 递归删除
+            "rm\\s+-rf", "rm\\s+--recursive", "rm\\s+--remove-destination",
+            // 格式化
+            "mkfs", "format", "fdisk",
+            // 磁盘写入
+            "dd\\s+if=", "dd\\s+of=",
+            // 进程炸弹
+            ":\\s*\\(\\s*\\)\\s*\\{\\s*:\\s*\\|\\s*:\\s*;\\s*\\}",
+            // 网络下载可能导致恶意代码
+            "wget", "curl",
+            // 权限更改可能导致安全漏洞
+            "chmod\\s+777",
+            // 系统关键文件
+            "/etc/passwd", "/etc/shadow", "/etc/sudoers",
+            // 覆盖根分区
+            ">\\s*/dev/sd", "mv\\s+[^ ]*\\s*/"
     );
 
     @Override
@@ -29,9 +45,10 @@ public class ShellTool implements ToolExecutor {
             return ToolHost.ToolResult.failure("No command provided");
         }
 
-        for (String blocked : BLOCKED_COMMANDS) {
-            if (command.toLowerCase().contains(blocked.toLowerCase())) {
-                return ToolHost.ToolResult.failure("Blocked dangerous command pattern: " + blocked);
+        for (String pattern : BLOCKED_PATTERNS) {
+            if (Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
+                    .matcher(command).find()) {
+                return ToolHost.ToolResult.failure("Blocked dangerous command pattern: " + pattern);
             }
         }
 
